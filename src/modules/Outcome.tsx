@@ -1,17 +1,36 @@
-import { ArrowUpRight, Download, Check, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, Download, Check, AlertCircle, FileText } from 'lucide-react';
 import { usePrism } from '../context/PrismContext';
+import { FinalResolutionReport } from '../components/reports/FinalResolutionReport';
 
 export function Outcome() {
   const { decisionData, setActiveModule } = usePrism();
+  const [showReport, setShowReport] = useState(false);
+
+  const targetValuation = 25;
+  const regulatoryDelay = 6;
+  const competitorSpend = 40;
+  const synergyRealization = 75;
+
+  const handleExportPDF = () => {
+    setShowReport(true);
+  };
 
   return (
-    <div className="h-full flex flex-col max-w-6xl mx-auto py-8">
+    <>
+      {showReport && (
+        <FinalResolutionReport 
+          onClose={() => setShowReport(false)} 
+          data={{ decisionData, targetValuation, regulatoryDelay, competitorSpend, synergyRealization }} 
+        />
+      )}
+      <div className="h-full flex flex-col max-w-6xl mx-auto py-8">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
         <div>
           <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-[0.2em] text-amber-600 mb-3">
             <div className="w-1.5 h-1.5 rounded-full bg-amber-600"></div>
-            Final Strategic Directive
+            Strategic Resolution
           </div>
           <h1 className="text-4xl font-serif text-[#F2EFE9] mb-3">
             {decisionData?.title || 'Phased European Market Entry'}
@@ -174,12 +193,13 @@ export function Outcome() {
             <ArrowUpRight size={16} className="text-gray-400" />
           </button>
 
-          <button className="w-full text-gray-400 hover:text-white py-2 flex items-center justify-center gap-2 text-sm font-medium transition-colors">
-            <Download size={16} />
-            Export as PDF
+          <button onClick={handleExportPDF} className="w-full text-gray-400 hover:text-white py-2 flex items-center justify-center gap-2 text-sm font-medium transition-colors">
+            <FileText size={16} />
+            Generate Final Resolution
           </button>
         </div>
       </div>
     </div>
+    </>
   );
 }

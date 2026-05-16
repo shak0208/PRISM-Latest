@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { ShieldAlert, BarChart3, Users2, Activity, Play, UploadCloud, Edit2, AlertTriangle, ShieldCheck, Download, Mail, Sparkles, Check, X } from 'lucide-react';
+import { ShieldAlert, BarChart3, Users2, Activity, Play, UploadCloud, Edit2, AlertTriangle, ShieldCheck, Download, Mail, Sparkles, Check, X, FileText } from 'lucide-react';
 import { usePrism } from '../context/PrismContext';
+import { ExecutivePreReadReport } from '../components/reports/ExecutivePreReadReport';
 
 export function Readiness() {
   const { decisionData, setActiveModule } = usePrism();
+  const [showReport, setShowReport] = useState(false);
 
   const [options, setOptions] = useState([
     { id: 1, title: "Controlled Regional Pilot Launch", desc: "Enter one priority geography with controlled capital allocation to validate market demand before scaling." },
@@ -32,7 +34,7 @@ export function Readiness() {
   };
 
   const handleConvene = () => {
-    setActiveModule('rehearsal');
+    setActiveModule('executive-debate');
   };
 
   const readinessScore = decisionData ? 88 : 0;
@@ -42,17 +44,28 @@ export function Readiness() {
   const complexityLevel = stakeholderCount > 3 ? "Very High" : stakeholderCount > 1 ? "Moderate" : "Low";
   const confidenceScore = decisionData ? 75 : 0; // Mock derived from data completeness
 
+  const handleDownload = () => {
+    setShowReport(true);
+  };
+
   return (
-    <div className="h-full flex flex-col max-w-7xl mx-auto py-8">
+    <>
+      {showReport && (
+        <ExecutivePreReadReport 
+          onClose={() => setShowReport(false)} 
+          data={{ decisionData, options, complexityLevel, confidenceScore, readinessScore }} 
+        />
+      )}
+      <div className="h-full flex flex-col max-w-7xl mx-auto py-8">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-4xl font-serif mb-2">Readiness Cockpit</h1>
+          <h1 className="text-4xl font-serif mb-2">Decision Readiness Assessment</h1>
           <p className="text-gray-400">Pre-simulation assessment & context overview.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#333] text-gray-300 hover:text-white hover:bg-white/5 transition-colors text-sm">
-            <Download size={14} />
-            Download Pre-read
+          <button onClick={handleDownload} className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#333] text-gray-300 hover:text-white hover:bg-white/5 transition-colors text-sm">
+            <FileText size={14} />
+            Generate Executive Pre-Read
           </button>
           <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#333] text-gray-300 hover:text-white hover:bg-white/5 transition-colors text-sm">
             <Mail size={14} />
@@ -205,6 +218,7 @@ export function Readiness() {
 
       </div>
     </div>
+    </>
   );
 }
 

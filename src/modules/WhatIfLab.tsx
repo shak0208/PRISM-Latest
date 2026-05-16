@@ -1,12 +1,17 @@
 import { useState } from 'react';
-import { ArrowRightLeft, Sparkles, TrendingDown, TrendingUp, Loader2, Save, History, LineChart as LineChartIcon, Activity } from 'lucide-react';
+import { ArrowRightLeft, Sparkles, TrendingDown, TrendingUp, Loader2, Save, History, LineChart as LineChartIcon, Activity, X, Trash2, PlayCircle, Info } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { usePrism } from '../context/PrismContext';
 
 export function WhatIfLab() {
+  const { setActiveModule, decisionData, saveScenario, savedScenarios, deleteScenario } = usePrism();
   const [query, setQuery] = useState('');
   const [isSimulating, setIsSimulating] = useState(false);
   const [hasSimulated, setHasSimulated] = useState(false);
   const [activeTab, setActiveTab] = useState<'variables' | 'chart'>('variables');
+  const [showEndModal, setShowEndModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
 
   // Stats
   const [targetValuation, setTargetValuation] = useState(25);
@@ -31,22 +36,67 @@ export function WhatIfLab() {
     }, 1500);
   };
 
+  const handleEndSimulation = () => {
+    setShowEndModal(false);
+    setActiveModule('workspace');
+  };
+
+  const handleSaveCurrent = () => {
+    saveScenario({
+      title: query || "Custom Scenario",
+      query: query,
+      stats: {
+        targetValuation,
+        regulatoryDelay,
+        competitorSpend,
+        synergyRealization
+      },
+      recommendation: targetValuation > 20 || competitorSpend > 30 ? "Dissent" : "Conditional",
+      decisionTitle: decisionData?.title || 'Unknown Decision'
+    });
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
+  const handleLoadScenario = (scenario: any) => {
+    setQuery(scenario.query);
+    setTargetValuation(scenario.stats.targetValuation);
+    setRegulatoryDelay(scenario.stats.regulatoryDelay);
+    setCompetitorSpend(scenario.stats.competitorSpend);
+    setSynergyRealization(scenario.stats.synergyRealization);
+    setShowLibrary(false);
+    setHasSimulated(true);
+  };
+
   return (
-    <div className="h-full flex flex-col max-w-7xl mx-auto py-8">
-      <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-serif mb-2">What-if Lab</h1>
-          <p className="text-gray-400">Stress test assumptions & run sensitivity analysis.</p>
+    <>
+      <div className="h-full flex flex-col max-w-7xl mx-auto py-8">
+        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-serif mb-2">What-if Analysis</h1>
+            <p className="text-gray-400">Stress test assumptions & run sensitivity analysis.</p>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <button 
+              onClick={() => setShowLibrary(true)}
+              className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 border border-[#333] hover:bg-white/5 rounded-lg text-sm text-gray-300 transition-colors"
+            >
+              <History size={16} /> <span className="hidden md:inline">Saved Scenarios</span>
+            </button>
+            <button 
+              onClick={handleSaveCurrent}
+              className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 border border-amber-500/50 hover:bg-amber-500/10 rounded-lg text-sm text-amber-500 transition-colors"
+            >
+              <Save size={16} /> Save Current
+            </button>
+            <button 
+              onClick={() => setShowEndModal(true)}
+              className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-6 py-2 bg-white text-black hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors ml-2 shadow-lg shadow-white/5"
+            >
+              End Simulation
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <button className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 border border-[#333] hover:bg-white/5 rounded-lg text-sm text-gray-300 transition-colors">
-            <History size={16} /> <span className="hidden md:inline">Saved Scenarios</span>
-          </button>
-          <button className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2 border border-amber-500/50 hover:bg-amber-500/10 rounded-lg text-sm text-amber-500 transition-colors">
-            <Save size={16} /> Save Current
-          </button>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 overflow-y-auto lg:overflow-hidden px-4">
         
@@ -237,8 +287,135 @@ export function WhatIfLab() {
             </div>
           )}
         </div>
+        </div>
       </div>
-    </div>
+      
+      {showEndModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#111] border border-[#333] rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-serif text-white">End Simulation</h3>
+              <button onClick={() => setShowEndModal(false)} className="text-gray-500 hover:text-white transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <p className="text-sm text-gray-400 mb-8">
+              End current simulation and return to home?
+            </p>
+            
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setShowEndModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-[#333] hover:bg-white/5 text-gray-300 font-medium transition-colors text-sm"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleEndSimulation}
+                className="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-medium shadow-lg shadow-amber-500/20 transition-colors text-sm"
+              >
+                End Simulation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLibrary && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[#0a0a0a] border border-[#333] rounded-2xl max-w-4xl w-full h-[80vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+            <div className="p-6 border-b border-[#222] flex justify-between items-center bg-[#111]">
+              <div>
+                <h3 className="text-2xl font-serif text-white">Scenario Library</h3>
+                <p className="text-sm text-gray-400">Sandbox of executive assumptions</p>
+              </div>
+              <button onClick={() => setShowLibrary(false)} className="text-gray-500 hover:text-white transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 bg-[#0a0a0a]">
+              {savedScenarios.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-[#1A1A1A] flex items-center justify-center mb-4">
+                    <History className="text-gray-600" size={32} />
+                  </div>
+                  <h4 className="text-lg text-white mb-2 font-serif">No scenarios saved</h4>
+                  <p className="text-gray-500 text-sm max-w-sm">
+                    Configure variables and click "Save Current" to store a snapshot in your library.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {savedScenarios.map((scenario) => (
+                    <div key={scenario.id} className="border border-[#222] bg-[#111] hover:border-[#444] transition-colors rounded-xl p-5 flex flex-col">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <div className="text-[10px] text-amber-500 uppercase tracking-widest font-bold mb-1">
+                            {scenario.decisionTitle}
+                          </div>
+                          <h4 className="text-lg font-medium text-white truncate max-w-[200px]" title={scenario.title}>
+                            {scenario.title}
+                          </h4>
+                        </div>
+                        <div className="text-[10px] text-gray-500 font-mono">
+                          {new Date(scenario.timestamp).toLocaleDateString()}
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3 mb-6 flex-1">
+                        <div className="bg-[#1A1A1A] p-3 rounded-lg">
+                          <p className="text-[10px] text-gray-500 uppercase mb-1">CFO Stance</p>
+                          <p className={`text-sm font-medium ${scenario.recommendation === 'Dissent' ? 'text-red-500' : 'text-amber-500'}`}>
+                            {scenario.recommendation}
+                          </p>
+                        </div>
+                        <div className="bg-[#1A1A1A] p-3 rounded-lg">
+                          <p className="text-[10px] text-gray-500 uppercase mb-1">Valuation Impact</p>
+                          <p className="text-sm text-white font-mono">-${scenario.stats.targetValuation}M</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-4 border-t border-[#222]">
+                        <button 
+                          onClick={() => handleLoadScenario(scenario)}
+                          className="flex-1 justify-center flex items-center gap-2 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <PlayCircle size={16} /> Load Scenario
+                        </button>
+                        <button 
+                          onClick={() => deleteScenario(scenario.id)}
+                          className="p-2 border border-[#333] hover:border-red-500/50 hover:bg-red-500/10 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
+                          title="Delete Scenario"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Premium Toast Notification */}
+      {showToast && (
+        <div className="fixed bottom-8 right-8 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-[#1A1A1A] border border-amber-500/30 shadow-[0_10px_40px_rgba(245,158,11,0.1)] rounded-lg py-3 px-4 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+              <Save size={16} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">Scenario saved successfully</p>
+              <p className="text-xs text-gray-400">Available in your scenario library</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

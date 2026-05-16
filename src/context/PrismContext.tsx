@@ -29,6 +29,21 @@ export const defaultPersonas: Record<string, PersonaData> = {
   CRO: { role: 'CRO', preset: 'Risk-sensitive', financialAggressiveness: 40, riskAppetite: 10, marketOptimism: 40, executionConfidence: 95 },
 };
 
+export interface SavedScenario {
+  id: string;
+  title: string;
+  query: string;
+  timestamp: number;
+  stats: {
+    targetValuation: number;
+    regulatoryDelay: number;
+    competitorSpend: number;
+    synergyRealization: number;
+  };
+  recommendation: string;
+  decisionTitle: string;
+}
+
 interface PrismContextType {
   activeModule: ModuleType;
   setActiveModule: (module: ModuleType) => void;
@@ -39,6 +54,9 @@ interface PrismContextType {
   deletePersona: (role: string) => void;
   simulationStatus: 'idle' | 'running' | 'completed';
   setSimulationStatus: (status: 'idle' | 'running' | 'completed') => void;
+  savedScenarios: SavedScenario[];
+  saveScenario: (scenario: Omit<SavedScenario, 'id' | 'timestamp'>) => void;
+  deleteScenario: (id: string) => void;
 }
 
 const PrismContext = createContext<PrismContextType | undefined>(undefined);
@@ -48,6 +66,7 @@ export function PrismProvider({ children }: { children: ReactNode }) {
   const [decisionData, setDecisionData] = useState<DecisionData | null>(null);
   const [personas, setPersonas] = useState<Record<string, PersonaData>>(defaultPersonas);
   const [simulationStatus, setSimulationStatus] = useState<'idle' | 'running' | 'completed'>('idle');
+  const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>([]);
 
   const updatePersona = (role: string, data: Partial<PersonaData>) => {
     setPersonas(prev => ({
@@ -64,6 +83,21 @@ export function PrismProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const saveScenario = (scenario: Omit<SavedScenario, 'id' | 'timestamp'>) => {
+    setSavedScenarios(prev => [
+      {
+        ...scenario,
+        id: Math.random().toString(36).substring(7),
+        timestamp: Date.now()
+      },
+      ...prev
+    ]);
+  };
+
+  const deleteScenario = (id: string) => {
+    setSavedScenarios(prev => prev.filter(s => s.id !== id));
+  };
+
   return (
     <PrismContext.Provider value={{
       activeModule,
@@ -74,7 +108,10 @@ export function PrismProvider({ children }: { children: ReactNode }) {
       updatePersona,
       deletePersona,
       simulationStatus,
-      setSimulationStatus
+      setSimulationStatus,
+      savedScenarios,
+      saveScenario,
+      deleteScenario
     }}>
       {children}
     </PrismContext.Provider>

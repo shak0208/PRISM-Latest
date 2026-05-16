@@ -51,16 +51,35 @@ const initialSequence = [
   },
 ];
 
-export function BoardroomRehearsal() {
+export function ExecutiveDebate() {
   const { decisionData, setActiveModule } = usePrism();
   const [sequence, setSequence] = useState(initialSequence);
   const [activeDialogueIndex, setActiveDialogueIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [initStage, setInitStage] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const timers: any[] = [];
+    
+    // Stage 1: Initializing Decision Engine
+    timers.push(setTimeout(() => setInitStage(1), 300));
+    
+    // Stage 2: Simulating Executive Discourse
+    timers.push(setTimeout(() => setInitStage(2), 2500));
+    
+    // Stage 3: Complete, show debate map
+    timers.push(setTimeout(() => {
+      setInitStage(3);
+      setIsPlaying(true); // Auto-play when ready
+    }, 4800));
+    
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  useEffect(() => {
     let interval: any;
-    if (isPlaying && activeDialogueIndex < sequence.length - 1) {
+    if (isPlaying && activeDialogueIndex < sequence.length - 1 && initStage === 3) {
       interval = setInterval(() => {
         setActiveDialogueIndex((prev) => prev + 1);
       }, 4000);
@@ -68,7 +87,7 @@ export function BoardroomRehearsal() {
       setIsPlaying(false);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, activeDialogueIndex, sequence.length]);
+  }, [isPlaying, activeDialogueIndex, sequence.length, initStage]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -90,14 +109,14 @@ export function BoardroomRehearsal() {
     setIsPlaying(false);
     const newInteraction = [
       {
-        id: Date.now(),
+        id: Math.random().toString(),
         role: "CEO",
         text: "CFO, what if we phased the capital drawdown over 3 quarters instead of upfront?",
         time: "01:45",
         alignments: { CEO: 85, CFO: 40, COO: 70, CMO: 70, CRO: 60 },
       },
       {
-        id: Date.now() + 1,
+        id: Math.random().toString(),
         role: "CFO",
         text: "Phasing the drawdown would reduce our blended rate exposure by around 40 bps. That makes the Y1 margin hit much more manageable. I could support that.",
         time: "02:10",
@@ -109,7 +128,7 @@ export function BoardroomRehearsal() {
       ...newInteraction,
       ...prev
         .slice(activeDialogueIndex + 1)
-        .map((item) => ({ ...item, id: item.id + 1000 })),
+        .map((item) => ({ ...item, id: typeof item.id === 'string' ? item.id + "_bump" : item.id + 1000 })),
     ]);
     setIsPlaying(true);
   };
@@ -118,14 +137,14 @@ export function BoardroomRehearsal() {
     setIsPlaying(false);
     const newInteraction = [
       {
-        id: Date.now(),
+        id: Math.random().toString(),
         role: "CEO",
         text: "Let's pivot back to the competitive landscape. CMO, what are the local players doing?",
         time: "01:55",
         alignments: { CEO: 80, CFO: 50, COO: 60, CMO: 85, CRO: 70 },
       },
       {
-        id: Date.now() + 1,
+        id: Math.random().toString(),
         role: "CMO",
         text: "They are slashing prices on entry-level tiers. If we enter now, we have to compete on premium value, not price.",
         time: "02:20",
@@ -139,13 +158,75 @@ export function BoardroomRehearsal() {
     setIsPlaying(true);
   };
 
+  const AnimatedDots = () => (
+    <span className="inline-flex w-8 tracking-widest">
+      <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, times: [0, 0.5, 1] }}>.</motion.span>
+      <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.2, times: [0, 0.5, 1] }}>.</motion.span>
+      <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, delay: 0.4, times: [0, 0.5, 1] }}>.</motion.span>
+    </span>
+  );
+
+  if (initStage < 3) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center pb-20">
+        <AnimatePresence mode="wait">
+          {initStage === 1 && (
+            <motion.div
+              key="stage1"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col items-center gap-6"
+            >
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-2 border-amber-500/20 border-t-amber-500 animate-spin" />
+                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                  <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                </div>
+              </div>
+              <h2 className="text-xl font-serif text-gray-300 tracking-widest uppercase">
+                Initializing Decision Engine<AnimatedDots />
+              </h2>
+            </motion.div>
+          )}
+          {initStage === 2 && (
+            <motion.div
+              key="stage2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col items-center gap-6"
+            >
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                </div>
+              </div>
+              <h2 className="text-xl font-serif text-gray-300 tracking-widest uppercase">
+                Simulating Executive Discourse<AnimatedDots />
+              </h2>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full flex flex-col max-w-[1400px] mx-auto pt-4 pb-0 overflow-hidden">
+    <motion.div 
+      initial={{ opacity: 0, filter: 'blur(10px)' }}
+      animate={{ opacity: 1, filter: 'blur(0px)' }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="h-full flex flex-col max-w-[1400px] mx-auto pt-4 pb-0 overflow-hidden"
+    >
       <div className="flex justify-between items-center mb-6 px-4">
         <div className="flex items-center gap-4">
           <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
           <h1 className="text-2xl font-serif text-white tracking-widest uppercase truncate max-w-lg">
-            Simulation Active: {decisionData?.title || "Unknown Decision"}
+            Executive Debate: {decisionData?.title || "Unknown Decision"}
           </h1>
         </div>
         <div className="text-amber-500 font-mono tracking-widest text-lg">
@@ -575,6 +656,6 @@ export function BoardroomRehearsal() {
           Halt & Resolve
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -172,7 +172,7 @@ export function DecisionIntake() {
           >
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-3xl font-serif mb-2">Decision Intake Profile</h2>
+                <h2 className="text-3xl font-serif mb-2">Strategic Briefing</h2>
                 <p className="text-gray-400">Structuring the analytic approach</p>
               </div>
               <button 

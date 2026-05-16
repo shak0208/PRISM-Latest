@@ -8,31 +8,31 @@ import { AnimatePresence, motion } from 'motion/react';
 import { PrismProvider, usePrism } from './context/PrismContext';
 
 // Placeholders for modules
-import { DecisionIntake } from './modules/DecisionIntake';
 import { CXOPersonas } from './modules/CXOPersonas';
-import { Readiness } from './modules/Readiness';
-import { BoardroomRehearsal } from './modules/BoardroomRehearsal';
-import { Outcome } from './modules/Outcome';
-import { WhatIfLab } from './modules/WhatIfLab';
 import { Integrations } from './modules/Integrations';
 import { MyWorkspace } from './modules/MyWorkspace';
-import { PostDebateAnalysis } from './modules/PostDebateAnalysis';
+import { BoardroomRehearsalFlow } from './modules/BoardroomRehearsalFlow';
 
 function AppContent() {
   const { activeModule, setActiveModule } = usePrism();
 
   const renderModule = () => {
     switch (activeModule) {
-      case 'intake': return <DecisionIntake />;
       case 'personas': return <CXOPersonas />;
-      case 'readiness': return <Readiness />;
-      case 'rehearsal': return <BoardroomRehearsal />;
-      case 'outcome': return <Outcome />;
-      case 'analysis': return <PostDebateAnalysis />;
-      case 'whatif': return <WhatIfLab />;
       case 'integrations': return <Integrations />;
       case 'workspace': return <MyWorkspace />;
-      default: return <DecisionIntake />;
+      
+      // All these steps are handled inside the BoardroomRehearsalFlow container
+      case 'rehearsal':
+      case 'intake':
+      case 'readiness':
+      case 'executive-debate':
+      case 'outcome':
+      case 'analysis':
+      case 'whatif':
+        return <BoardroomRehearsalFlow />;
+        
+      default: return <BoardroomRehearsalFlow />;
     }
   };
 
@@ -44,10 +44,15 @@ function AppContent() {
         {/* Subtle background glow */}
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
         
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 relative z-10">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 relative z-10 h-full">
+          {/* We do not animate the top level module changes when inside the flow to avoid double animation,
+              Wait, since App.tsx is rendering BoardroomRehearsalFlow for all these, AnimatePresence here will not trigger 
+              re-mounts because the key will just be activeModule.
+              To prevent double animations during the flow, the key here should be just "flow" for any of the flow states, 
+              so it doesn't unmount BoardroomRehearsalFlow between steps. */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeModule}
+              key={['personas', 'integrations', 'workspace'].includes(activeModule) ? activeModule : 'flow'}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
