@@ -1,0 +1,8 @@
+{
+  "name": "Remix: PRISM: Pre-decision Risk \u0026 Insight Simulation Module",
+  "description": "A premium enterprise web application for executive decision rehearsal, helping leadership teams frame strategic problems, simulate boardroom discussions, and run what-if analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
