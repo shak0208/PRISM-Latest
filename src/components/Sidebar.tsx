@@ -3,7 +3,7 @@ import { FileText, Users, PlayCircle, Link, LayoutGrid, ChevronLeft, ChevronRigh
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
-export type ModuleType = 'intake' | 'personas' | 'readiness' | 'rehearsal' | 'executive-debate' | 'outcome' | 'analysis' | 'whatif' | 'integrations' | 'workspace';
+export type ModuleType = 'landing' | 'intake' | 'personas' | 'readiness' | 'rehearsal' | 'executive-debate' | 'outcome' | 'analysis' | 'whatif' | 'integrations' | 'workspace';
 
 interface SidebarProps {
   activeModule: ModuleType;
@@ -21,7 +21,7 @@ export function Sidebar({ activeModule, setActiveModule }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   
   // Consider rehearsal as active if any of its sub-steps are active
-  const isRehearsalActive = ['rehearsal', 'intake', 'readiness', 'executive-debate', 'outcome', 'analysis', 'whatif'].includes(activeModule);
+  const isRehearsalActive = ['landing', 'rehearsal', 'intake', 'readiness', 'executive-debate', 'outcome', 'analysis', 'whatif'].includes(activeModule);
 
   return (
     <motion.div 
@@ -37,7 +37,10 @@ export function Sidebar({ activeModule, setActiveModule }: SidebarProps) {
         {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
       </button>
 
-      <div className={cn("flex items-center gap-2 mb-8", collapsed ? "px-0 justify-center" : "px-2")}>
+      <button 
+        onClick={() => setActiveModule('landing')}
+        className={cn("flex items-center gap-2 mb-8 cursor-pointer focus:outline-none", collapsed ? "px-0 justify-center" : "px-2")}
+      >
         <div className="w-8 h-8 rounded bg-amber-500 flex items-center justify-center font-serif font-bold text-black border border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.2)] shrink-0">
           P
         </div>
@@ -48,13 +51,13 @@ export function Sidebar({ activeModule, setActiveModule }: SidebarProps) {
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
               exit={{ opacity: 0, width: 0 }}
-              className="font-serif text-lg tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-amber-200 overflow-hidden whitespace-nowrap"
+              className="font-serif text-lg tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-amber-200 overflow-hidden whitespace-nowrap text-left"
             >
               Prism
             </motion.span>
           )}
         </AnimatePresence>
-      </div>
+      </button>
 
       <nav className="flex flex-col gap-1 flex-1">
         {modules.map((mod) => {
@@ -64,7 +67,7 @@ export function Sidebar({ activeModule, setActiveModule }: SidebarProps) {
           return (
             <button
               key={mod.id}
-              onClick={() => setActiveModule(mod.id)}
+              onClick={() => setActiveModule(mod.id === 'rehearsal' ? 'landing' : mod.id)}
               className={cn(
                 "flex items-center gap-3 py-2.5 rounded-lg text-sm transition-all relative group text-left",
                 collapsed ? "justify-center px-0" : "px-3",

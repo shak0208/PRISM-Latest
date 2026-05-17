@@ -14,8 +14,7 @@ const suggestions = [
 ];
 
 export function DecisionIntake() {
-  const { decisionData, setDecisionData, setActiveModule } = usePrism();
-  const [isStructured, setIsStructured] = useState(!!decisionData);
+  const { activeModule, decisionData, setDecisionData, setActiveModule } = usePrism();
   const [inputValue, setInputValue] = useState(decisionData?.title || '');
 
   // Form state
@@ -30,13 +29,12 @@ export function DecisionIntake() {
   const [isRefining, setIsRefining] = useState(false);
 
   useEffect(() => {
-    if (!decisionData) {
-      setIsStructured(false);
+    if (!decisionData && activeModule === 'landing') {
       setInputValue('');
       setTitle('');
       setProblemStatement('');
     }
-  }, [decisionData]);
+  }, [decisionData, activeModule]);
 
   useEffect(() => {
     if (inputValue && !problemStatement) {
@@ -50,9 +48,9 @@ export function DecisionIntake() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (inputValue.trim()) {
-      setIsStructured(true);
       if (!title) setTitle(inputValue);
       if (!problemStatement) setProblemStatement(`How should we approach "${inputValue}" given the current market conditions?`);
+      setActiveModule('intake');
     }
   };
 
@@ -108,7 +106,7 @@ export function DecisionIntake() {
   return (
     <div className="h-full flex flex-col justify-center max-w-4xl mx-auto py-12 px-4">
       <AnimatePresence mode="wait">
-        {!isStructured ? (
+        {activeModule === 'landing' ? (
           <motion.div
             key="conversational"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -176,7 +174,7 @@ export function DecisionIntake() {
                 <p className="text-gray-400">Structuring the analytic approach</p>
               </div>
               <button 
-                onClick={() => setIsStructured(false)}
+                onClick={() => setActiveModule('landing')}
                 className="text-sm px-4 py-2 border border-[#333] rounded-lg hover:bg-white/5 transition-colors"
               >
                 Start Over

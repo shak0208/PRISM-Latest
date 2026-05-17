@@ -24,6 +24,7 @@ function AppContent() {
       
       // All these steps are handled inside the BoardroomRehearsalFlow container
       case 'rehearsal':
+      case 'landing':
       case 'intake':
       case 'readiness':
       case 'executive-debate':
