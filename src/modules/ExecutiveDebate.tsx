@@ -1,14 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  Pause,
-  Play,
-  FastForward,
   User,
   CheckCircle2,
   XCircle,
   FileWarning,
-  RefreshCcw,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { usePrism } from "../context/PrismContext";
@@ -20,6 +16,7 @@ const initialSequence = [
     text: "Thank you all for joining. We are here to discuss the LATAM market entry. The opportunity is clear, but the capital requirements are substantial. CMO, how confident are we in the brand translation?",
     time: "00:01",
     alignments: { CEO: 90, CFO: 50, COO: 80, CMO: 75, CRO: 60 },
+    thinking: "Balancing growth opportunity against capital constraints. Need to ensure marketing isn't minimizing the localization costs.",
   },
   {
     id: 2,
@@ -27,6 +24,7 @@ const initialSequence = [
     text: "Brand resonance testing indicates a 68% favorability score, which is on par with our domestic launch. However, localized marketing spend will need to be 15% higher than modeled to combat entrenched local players.",
     time: "00:15",
     alignments: { CEO: 85, CFO: 40, COO: 75, CMO: 80, CRO: 60 },
+    thinking: "The product translates well, but CAC will be high early on. Must set realistic expectations on customer acquisition budget.",
   },
   {
     id: 3,
@@ -34,6 +32,7 @@ const initialSequence = [
     text: "That 15% variance immediately compresses our Year 1 margin. If we proceed with the aggressive timeline, we will need to draw down on the revolver facility. I am uncomfortable with that risk profile given current interest rates.",
     time: "00:42",
     alignments: { CEO: 80, CFO: 30, COO: 60, CMO: 70, CRO: 50 },
+    thinking: "Protecting liquidity is paramount. The cost of debt right now erodes the projected IRR. Need to push back on the aggressive timeline.",
   },
   {
     id: 4,
@@ -41,6 +40,7 @@ const initialSequence = [
     text: "From an supply chain perspective, the infrastructure is ready. We have letters of intent from key distributors. Delaying means we lose our exclusivity windows with them.",
     time: "01:10",
     alignments: { CEO: 85, CFO: 25, COO: 90, CMO: 75, CRO: 45 },
+    thinking: "Operational momentum is hard to rebuild. If we pause, competitors will lock up these distributors. I must defend the timeline.",
   },
   {
     id: 5,
@@ -48,6 +48,7 @@ const initialSequence = [
     text: "The regulatory compliance costs have just been revised upwards. If we don't factor in a 12-month compliance buffer, we could face operational bans.",
     time: "01:35",
     alignments: { CEO: 75, CFO: 20, COO: 70, CMO: 65, CRO: 80 },
+    thinking: "Recent shifts in foreign data laws are not fully priced into the CFO's model. Must flag the catastrophic risk of non-compliance.",
   },
 ];
 
@@ -57,7 +58,12 @@ export function ExecutiveDebate() {
   const [activeDialogueIndex, setActiveDialogueIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [initStage, setInitStage] = useState(0);
+  const [expandedThinking, setExpandedThinking] = useState<Record<string | number, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const toggleThinking = (id: string | number) => {
+    setExpandedThinking(prev => ({...prev, [id]: !prev[id]}));
+  };
 
   useEffect(() => {
     const timers: any[] = [];
@@ -103,59 +109,6 @@ export function ExecutiveDebate() {
     COO: 50,
     CMO: 50,
     CRO: 50,
-  };
-
-  const handleChallengeCFO = () => {
-    setIsPlaying(false);
-    const newInteraction = [
-      {
-        id: Math.random().toString(),
-        role: "CEO",
-        text: "CFO, what if we phased the capital drawdown over 3 quarters instead of upfront?",
-        time: "01:45",
-        alignments: { CEO: 85, CFO: 40, COO: 70, CMO: 70, CRO: 60 },
-      },
-      {
-        id: Math.random().toString(),
-        role: "CFO",
-        text: "Phasing the drawdown would reduce our blended rate exposure by around 40 bps. That makes the Y1 margin hit much more manageable. I could support that.",
-        time: "02:10",
-        alignments: { CEO: 90, CFO: 75, COO: 80, CMO: 75, CRO: 65 },
-      },
-    ];
-    setSequence((prev) => [
-      ...prev.slice(0, activeDialogueIndex + 1),
-      ...newInteraction,
-      ...prev
-        .slice(activeDialogueIndex + 1)
-        .map((item) => ({ ...item, id: typeof item.id === 'string' ? item.id + "_bump" : item.id + 1000 })),
-    ]);
-    setIsPlaying(true);
-  };
-
-  const handleRedirect = () => {
-    setIsPlaying(false);
-    const newInteraction = [
-      {
-        id: Math.random().toString(),
-        role: "CEO",
-        text: "Let's pivot back to the competitive landscape. CMO, what are the local players doing?",
-        time: "01:55",
-        alignments: { CEO: 80, CFO: 50, COO: 60, CMO: 85, CRO: 70 },
-      },
-      {
-        id: Math.random().toString(),
-        role: "CMO",
-        text: "They are slashing prices on entry-level tiers. If we enter now, we have to compete on premium value, not price.",
-        time: "02:20",
-        alignments: { CEO: 85, CFO: 55, COO: 65, CMO: 90, CRO: 75 },
-      },
-    ];
-    setSequence((prev) => [
-      ...prev.slice(0, activeDialogueIndex + 1),
-      ...newInteraction,
-    ]);
-    setIsPlaying(true);
   };
 
   const AnimatedDots = () => (
@@ -229,9 +182,12 @@ export function ExecutiveDebate() {
             Executive Debate: {decisionData?.title || "Unknown Decision"}
           </h1>
         </div>
-        <div className="text-amber-500 font-mono tracking-widest text-lg">
-          {activeDialogue?.time || "00:00"}
-        </div>
+        <button
+          onClick={() => setActiveModule("outcome")}
+          className="bg-amber-600 hover:bg-amber-500 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
+          Force Consensus
+        </button>
       </div>
 
       <div className="flex-1 grid grid-cols-12 gap-6 min-h-0 mb-6">
@@ -246,7 +202,7 @@ export function ExecutiveDebate() {
             {/* Center Hub */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[140px] rounded-[100%] bg-gradient-to-b from-[#111] to-[#000] border border-amber-500/30 flex items-center justify-center flex-col z-10 shadow-[0_0_50px_rgba(247,144,29,0.15)]">
               <h2 className="text-3xl font-serif text-amber-500 glow-text drop-shadow-[0_0_10px_rgba(247,144,29,0.5)]">
-                Tiger Decision Engine
+                PRISM Decision Engine
               </h2>
               <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-amber-600/80 mt-2">
                 EXECUTIVE BOARDROOM
@@ -453,35 +409,55 @@ export function ExecutiveDebate() {
                         <p className="text-sm text-gray-300 leading-relaxed font-light">
                           {dialogue.text}
                         </p>
-                        <div className="mt-4 flex items-center gap-1 text-[9px] text-gray-500 uppercase tracking-widest cursor-pointer hover:text-white transition-colors">
-                          <svg
-                            className="w-3 h-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                        {/* Thinking toggle */}
+                        {(dialogue as any).thinking && (
+                          <div 
+                            className="mt-4 flex items-center gap-1 text-[9px] text-gray-500 uppercase tracking-widest cursor-pointer hover:text-white transition-colors select-none"
+                            onClick={() => toggleThinking(dialogue.id)}
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                          </svg>
-                          THINKING
-                          <svg
-                            className="w-3 h-3 ml-0.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M19 9l-7 7-7-7"
-                            ></path>
-                          </svg>
-                        </div>
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              ></path>
+                            </svg>
+                            THINKING
+                            <svg
+                              className={cn("w-3 h-3 ml-0.5 transition-transform", expandedThinking[dialogue.id] ? "-rotate-90" : "")}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M19 9l-7 7-7-7"
+                              ></path>
+                            </svg>
+                          </div>
+                        )}
+                        <AnimatePresence>
+                          {expandedThinking[dialogue.id] && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="mt-3 p-3 bg-[#0a0a0a] border border-[#222] rounded text-xs text-amber-500/80 font-mono">
+                                {(dialogue as any).thinking}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </motion.div>
                   );
@@ -598,64 +574,7 @@ export function ExecutiveDebate() {
         </div>
       </div>
 
-      {/* Bottom Controls */}
-      <div className="h-20 bg-[#161616] border border-[#2A2A2A] rounded-t-3xl flex items-center justify-between px-8 relative shrink-0 z-20">
-        <div className="flex gap-4">
-          <button
-            onClick={handleChallengeCFO}
-            className="text-sm text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg border border-transparent hover:border-white/10"
-          >
-            Challenge CFO
-          </button>
-          <button
-            onClick={handleRedirect}
-            className="text-sm text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg border border-transparent hover:border-white/10 flex items-center gap-2"
-          >
-            <RefreshCcw size={14} /> Redirect Flow
-          </button>
-        </div>
 
-        <div className="flex items-center gap-6 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <button
-            onClick={() => {
-              setActiveDialogueIndex(0);
-              setIsPlaying(false);
-            }}
-            className="text-gray-500 hover:text-white transition-colors"
-          >
-            <FastForward size={20} className="rotate-180" />
-          </button>
-
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-          >
-            {isPlaying ? (
-              <Pause fill="currentColor" />
-            ) : (
-              <Play fill="currentColor" className="ml-1" />
-            )}
-          </button>
-
-          <button
-            onClick={() => {
-              if (activeDialogueIndex < sequence.length - 1)
-                setActiveDialogueIndex(sequence.length - 1);
-              setIsPlaying(false);
-            }}
-            className="text-gray-500 hover:text-white transition-colors"
-          >
-            <FastForward size={20} />
-          </button>
-        </div>
-
-        <button
-          onClick={() => setActiveModule("outcome")}
-          className="bg-amber-600 hover:bg-amber-500 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          Halt & Resolve
-        </button>
-      </div>
     </motion.div>
   );
 }

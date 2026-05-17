@@ -50,57 +50,14 @@ export function BoardroomRehearsalFlow() {
     <div className="flex flex-col h-full overflow-hidden">
       {/* Progress Indicator Header */}
       {activeModule !== 'landing' && (
-        <div className="shrink-0 pb-10 pt-4 mb-4">
-          <div className="text-center mb-8 flex justify-center items-center gap-2">
+        <div className="shrink-0 pb-6 pt-4">
+          <div className="text-center mb-4 flex justify-center items-center gap-2">
             <span className="text-3xl md:text-4xl font-serif tracking-tight text-[#FAF9F6]">
               Executive Decision
             </span>
             <span className="text-3xl md:text-4xl font-serif glow-text tracking-tight text-[#F7901D]">
               Journey
             </span>
-          </div>
-          <div className="flex items-center justify-between max-w-4xl mx-auto px-4 relative">
-            {/* Connecting Line */}
-            <div className="absolute top-1/2 left-10 right-10 h-px bg-[#222] -translate-y-1/2 z-0" />
-            <div 
-              className="absolute top-1/2 left-10 h-px bg-amber-900/50 -translate-y-1/2 z-0 transition-all duration-700 ease-in-out"
-              style={{ width: `calc(${(activeStepIndex / (steps.length - 1)) * 100}% - 5rem)` }}
-            />
-
-            {steps.map((step, idx) => {
-              const isActive = idx === activeStepIndex;
-              const isCompleted = idx < activeStepIndex;
-              const Icon = step.icon;
-
-              return (
-                <button
-                  key={step.id}
-                  onClick={() => setActiveModule(step.id as any)}
-                  className="relative z-10 flex flex-col items-center gap-2 group"
-                >
-                  <div 
-                    className={cn(
-                      "w-10 h-10 rounded-full border flex items-center justify-center transition-all bg-bg-dark",
-                      isActive 
-                        ? "border-amber-500 text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.15)] bg-amber-500/5" 
-                        : isCompleted 
-                          ? "border-amber-900/50 text-amber-600 bg-amber-900/10" 
-                          : "border-[#222] text-[#444] group-hover:border-[#333] group-hover:text-[#666]"
-                    )}
-                  >
-                    {isCompleted ? <Check size={16} /> : <Icon size={16} strokeWidth={isActive ? 2 : 1.5} />}
-                  </div>
-                  <span 
-                    className={cn(
-                      "absolute top-14 text-[9px] uppercase font-semibold tracking-widest whitespace-nowrap transition-colors",
-                      isActive ? "text-amber-500" : isCompleted ? "text-amber-700/70" : "text-gray-700 group-hover:text-gray-500"
-                    )}
-                  >
-                    {step.label}
-                  </span>
-                </button>
-              );
-            })}
           </div>
         </div>
       )}

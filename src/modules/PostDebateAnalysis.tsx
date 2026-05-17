@@ -44,10 +44,38 @@ export function PostDebateAnalysis() {
       )}
       <div className="h-full flex flex-col max-w-7xl mx-auto py-8">
       {/* Header */}
-      <div className="mb-8 flex justify-between items-end shrink-0">
+      <div className="mb-8 flex flex-col xl:flex-row xl:justify-between xl:items-end shrink-0 gap-6">
         <div>
           <h1 className="text-4xl font-serif mb-2 text-[#F2EFE9]">Post-Debate Analysis</h1>
           <p className="text-gray-400 font-medium tracking-wide">Simulated Executive Decision Intelligence Report</p>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <button 
+            onClick={() => setActiveModule('executive-debate')}
+            className="px-4 py-2 bg-[#161616] border border-[#333] hover:border-gray-500 rounded-lg text-sm font-medium text-white transition-all shadow-sm"
+          >
+            Replay Simulation
+          </button>
+          <button 
+            onClick={handleExportPDF}
+            className="px-4 py-2 bg-[#161616] border border-[#333] hover:border-gray-500 rounded-lg text-sm font-medium text-white transition-all shadow-sm flex items-center gap-2"
+          >
+            <FileText size={14} />
+            <span>Generate Board Pack</span>
+          </button>
+          <button 
+            className="px-4 py-2 bg-[#161616] border border-[#333] hover:border-amber-500/50 hover:text-amber-500 rounded-lg text-sm font-medium text-white transition-all shadow-sm flex items-center gap-2"
+          >
+            <Mail size={14} />
+            <span>Email CEO</span>
+          </button>
+          <button 
+            onClick={() => setActiveModule('whatif')}
+            className="px-5 py-2 bg-amber-600 hover:bg-amber-500 rounded-lg text-sm font-medium text-white transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2 xl:ml-2"
+          >
+            Explore What-if Analysis <ArrowRight size={16} />
+          </button>
         </div>
       </div>
 
@@ -389,38 +417,7 @@ export function PostDebateAnalysis() {
            </div>
         </div>
 
-        {/* Section 13: Action Panel */}
-        <div className="sticky bottom-0 left-0 w-full bg-[#111]/80 backdrop-blur-md border-t border-[#2A2A2A] p-4 flex flex-col sm:flex-row gap-4 justify-between items-center z-50 rounded-2xl mt-8">
-           <div className="flex flex-wrap gap-3 w-full sm:w-auto justify-center">
-             <button 
-               onClick={() => setActiveModule('rehearsal')}
-               className="px-4 md:px-5 py-2.5 bg-[#161616] border border-[#333] hover:border-gray-500 rounded-lg font-medium text-white transition-all shadow-sm"
-             >
-               Replay Simulation
-             </button>
-             <button 
-               onClick={handleExportPDF}
-               className="px-4 md:px-5 py-2.5 bg-[#161616] border border-[#333] hover:border-gray-500 rounded-lg font-medium text-white transition-all shadow-sm flex items-center gap-2"
-             >
-               <FileText size={16} />
-               <span className="hidden lg:inline">Generate Board Pack</span>
-             </button>
-             <button 
-               className="px-4 md:px-5 py-2.5 bg-[#161616] border border-[#333] hover:border-amber-500/50 hover:text-amber-500 rounded-lg font-medium text-white transition-all shadow-sm flex items-center gap-2"
-             >
-               <Mail size={16} />
-               <span className="hidden md:inline">Email CEO</span>
-             </button>
-           </div>
-           <div className="flex gap-3 w-full sm:w-auto mt-2 sm:mt-0">
-             <button 
-               onClick={() => setActiveModule('whatif')}
-               className="w-full sm:w-auto justify-center px-6 py-2.5 bg-amber-600 hover:bg-amber-500 rounded-lg font-medium text-white transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2"
-             >
-               Explore What-if Analysis <ArrowRight size={16} />
-             </button>
-           </div>
-        </div>
+
 
       </div>
     </div>

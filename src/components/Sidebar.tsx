@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Users, PlayCircle, Link, LayoutGrid, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Users, PlayCircle, Link, LayoutGrid, ChevronLeft, ChevronRight, Target, CheckCircle2, BarChart3, TestTube, ChevronDown } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -10,6 +10,15 @@ interface SidebarProps {
   setActiveModule: (module: ModuleType) => void;
 }
 
+const rehearsalSteps = [
+  { id: 'intake', label: 'Briefing', icon: FileText },
+  { id: 'readiness', label: 'Readiness', icon: Target },
+  { id: 'executive-debate', label: 'Debate', icon: PlayCircle },
+  { id: 'outcome', label: 'Resolution', icon: CheckCircle2 },
+  { id: 'analysis', label: 'Analysis', icon: BarChart3 },
+  { id: 'whatif', label: 'What-if', icon: TestTube },
+] as const;
+
 const modules: { id: ModuleType; label: string; icon: React.ElementType }[] = [
   { id: 'rehearsal', label: 'Boardroom Rehearsal', icon: PlayCircle },
   { id: 'personas', label: 'CXO Personas', icon: Users },
@@ -19,9 +28,17 @@ const modules: { id: ModuleType; label: string; icon: React.ElementType }[] = [
 
 export function Sidebar({ activeModule, setActiveModule }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [rehearsalExpanded, setRehearsalExpanded] = useState(true);
   
   // Consider rehearsal as active if any of its sub-steps are active
   const isRehearsalActive = ['landing', 'rehearsal', 'intake', 'readiness', 'executive-debate', 'outcome', 'analysis', 'whatif'].includes(activeModule);
+
+  // Automatically expand if a rehearsal substep is active
+  React.useEffect(() => {
+    if (isRehearsalActive) {
+      setRehearsalExpanded(true);
+    }
+  }, [isRehearsalActive]);
 
   return (
     <motion.div 
@@ -61,45 +78,95 @@ export function Sidebar({ activeModule, setActiveModule }: SidebarProps) {
 
       <nav className="flex flex-col gap-1 flex-1">
         {modules.map((mod) => {
-          const isActive = mod.id === 'rehearsal' ? isRehearsalActive : activeModule === mod.id;
+          const isRehearsal = mod.id === 'rehearsal';
+          const isActive = isRehearsal ? isRehearsalActive : activeModule === mod.id;
           const Icon = mod.icon;
           
           return (
-            <button
-              key={mod.id}
-              onClick={() => setActiveModule(mod.id === 'rehearsal' ? 'landing' : mod.id)}
-              className={cn(
-                "flex items-center gap-3 py-2.5 rounded-lg text-sm transition-all relative group text-left",
-                collapsed ? "justify-center px-0" : "px-3",
-                isActive 
-                  ? "text-amber-500 bg-amber-500/10"
-                  : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
-              )}
-              title={collapsed ? mod.label : undefined}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="sidebar-active"
-                  className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-r-full"
-                  initial={false}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              )}
-              <Icon size={18} className={cn("shrink-0", isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100")} />
+            <div key={mod.id} className="flex flex-col">
+              <button
+                onClick={() => {
+                  if (isRehearsal) {
+                    if (isRehearsalActive) {
+                      setRehearsalExpanded(!rehearsalExpanded);
+                    } else {
+                      setActiveModule('landing');
+                    }
+                  } else {
+                    setActiveModule(mod.id);
+                  }
+                }}
+                className={cn(
+                  "flex items-center justify-between py-2.5 rounded-lg text-sm transition-all relative group text-left",
+                  collapsed ? "justify-center px-0" : "px-3",
+                  isActive 
+                    ? "text-amber-500 bg-amber-500/10"
+                    : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+                )}
+                title={collapsed ? mod.label : undefined}
+              >
+                <div className="flex items-center gap-3 overflow-hidden">
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebar-active"
+                      className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-r-full"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  <Icon size={18} className={cn("shrink-0", isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100")} />
+                  <AnimatePresence>
+                    {!collapsed && (
+                      <motion.span 
+                        key="label"
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        className="truncate whitespace-nowrap overflow-hidden"
+                      >
+                        {mod.label}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </div>
+                {!collapsed && isRehearsal && (
+                  <ChevronDown size={14} className={cn("transition-transform", rehearsalExpanded ? "rotate-180" : "")} />
+                )}
+              </button>
+
+              {/* Sub-steps for rehearsal */}
               <AnimatePresence>
-                {!collapsed && (
-                  <motion.span 
-                    key="label"
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: "auto" }}
-                    exit={{ opacity: 0, width: 0 }}
-                    className="truncate whitespace-nowrap overflow-hidden"
+                {isRehearsal && !collapsed && rehearsalExpanded && isRehearsalActive && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="flex flex-col gap-1 overflow-hidden ml-6 mt-1 border-l border-[#333] pl-2"
                   >
-                    {mod.label}
-                  </motion.span>
+                    {rehearsalSteps.map((step) => {
+                      const StepIcon = step.icon;
+                      const isStepActive = activeModule === step.id;
+                      
+                      return (
+                        <button
+                          key={step.id}
+                          onClick={() => setActiveModule(step.id as any)}
+                          className={cn(
+                            "flex items-center gap-3 py-2 px-3 rounded-lg text-xs transition-colors text-left",
+                            isStepActive
+                              ? "text-amber-500 bg-amber-500/10"
+                              : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+                          )}
+                        >
+                          <StepIcon size={14} className={cn("shrink-0", isStepActive ? "opacity-100" : "opacity-70")} />
+                          <span className="truncate">{step.label}</span>
+                        </button>
+                      );
+                    })}
+                  </motion.div>
                 )}
               </AnimatePresence>
-            </button>
+            </div>
           );
         })}
       </nav>

@@ -276,7 +276,7 @@ export function DecisionIntake() {
                   <label className={`flex-1 p-4 rounded-xl border cursor-pointer transition-all ${simulationMode === 'Quick Rehearsal' ? 'border-amber-500 bg-amber-500/10' : 'border-[#333] bg-black/50 hover:bg-white/5'}`}>
                     <input type="radio" value="Quick Rehearsal" checked={simulationMode === 'Quick Rehearsal'} onChange={() => setSimulationMode('Quick Rehearsal')} className="hidden" />
                     <div className="font-medium text-white mb-1">Quick Rehearsal</div>
-                    <div className="text-xs text-gray-400">10-15 minute accelerated simulation.</div>
+                    <div className="text-xs text-gray-400">2-3 minute accelerated simulation.</div>
                   </label>
                   <label className={`flex-1 p-4 rounded-xl border cursor-pointer transition-all ${simulationMode === 'Full Boardroom' ? 'border-amber-500 bg-amber-500/10' : 'border-[#333] bg-black/50 hover:bg-white/5'}`}>
                     <input type="radio" value="Full Boardroom" checked={simulationMode === 'Full Boardroom'} onChange={() => setSimulationMode('Full Boardroom')} className="hidden" />
